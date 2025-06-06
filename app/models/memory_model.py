@@ -1,41 +1,45 @@
 import time
-from datetime import datetime, timedelta
-import chromadb
-from flask import jsonify
 import json
-from sentence_transformers import SentenceTransformer
-import os
-
-chroma_client = chromadb.PersistentClient(path="./memory_db")
-collection = chroma_client.get_or_create_collection(name="chat_memory")
-MEMORY_FILE = "./app/memory/short_memory/short_memory.json" 
-
-model = SentenceTransformer("all-MiniLM-L6-v2")  
-
-import time
 from typing import List
+from flask import jsonify
+from sentence_transformers import SentenceTransformer
+import chromadb
 
-# fungsi untuk membagi teks menjadi chunk
-def chunk_text(text: str, max_chunk_size: int = 500) -> List[str]:
-    chunks = []
-    start = 0
-    while start < len(text):
-        end = start + max_chunk_size
-        chunks.append(text[start:end])
-        start = end
-    return chunks
 
-# fungsi untuk menambahkan memori ke collection dengan vector agar bisa di cari similarity
-def add_memory(collection, model, path: str, response: str, important: bool = False):
-    if important:
+class MemoryManager:
+    def __init__(self,
+                 chroma_path: str = "./memory_db",
+                 collection_name: str = "chat_memory",
+                 short_memory_file: str = "./app/memory/short_memory/short_memory.json",
+                 model_name: str = "all-MiniLM-L6-v2",
+                 max_chunk_size: int = 500):
+        self.chroma_client = chromadb.PersistentClient(path=chroma_path)
+        self.collection_name = collection_name
+        self.collection = self.chroma_client.get_or_create_collection(name=collection_name)
+        self.short_memory_file = short_memory_file
+        self.model = SentenceTransformer(model_name)
+        self.max_chunk_size = max_chunk_size
+
+    def chunk_text(self, text: str) -> List[str]:
+        chunks = []
+        start = 0
+        while start < len(text):
+            end = start + self.max_chunk_size
+            chunks.append(text[start:end])
+            start = end
+        return chunks
+
+    def add_memory(self, path: str, response: str, important: bool = False):
+        if not important:
+            return  # ignore non-important for now
+
         timestamp = time.time()
-        current_ids = collection.get()["ids"]
+        current_ids = self.collection.get()["ids"]
         new_id = str(len(current_ids))
 
-        # Embed response (dokumen)
-        embedding = model.encode(response).tolist()
+        embedding = self.model.encode(response).tolist()
 
-        collection.add(
+        self.collection.add(
             embeddings=[embedding],
             metadatas=[{
                 "timestamp": timestamp,
@@ -43,75 +47,67 @@ def add_memory(collection, model, path: str, response: str, important: bool = Fa
             }],
             ids=[new_id],
         )
-        
-# funsi untuk mencari  document relevat dengan yang dikirim hanya potonganya saja
-def get_memory(collection, model, query: str, top_k: int = 3, max_chunk_size: int = 500) -> List[str]:
-    query_embedding = model.encode(query).tolist()
 
-    results = collection.query(
-        query_embeddings=[query_embedding],
-        n_results=top_k,
-        include=["metadatas", "distances"]
-    )
+    def get_memory(self, query: str, top_k: int = 3) -> str:
+        query_embedding = self.model.encode(query).tolist()
 
-    scored_chunks = []
-    for metadata, distance in zip(results["metadatas"][0], results["distances"][0]):
-        path = metadata.get('path')
-        if not path:
-            continue
+        results = self.collection.query(
+            query_embeddings=[query_embedding],
+            n_results=top_k,
+            include=["metadatas", "distances"]
+        )
 
-        # baca isi file dokumen dari path
-        with open(path, 'r', encoding='utf-8') as f:
-            doc = f.read()
+        scored_chunks = []
+        for metadata, distance in zip(results["metadatas"][0], results["distances"][0]):
+            path = metadata.get('path')
+            if not path:
+                continue
 
-        # chunk isi dokumen
-        chunks = chunk_text(doc, max_chunk_size)
-        for chunk in chunks:
-            scored_chunks.append((distance, chunk))
+            with open(path, 'r', encoding='utf-8') as f:
+                doc = f.read()
 
-    scored_chunks.sort(key=lambda x: x[0])
-    top_chunks = [chunk for _, chunk in scored_chunks[:top_k]]
+            chunks = self.chunk_text(doc)
+            for chunk in chunks:
+                scored_chunks.append((distance, chunk))
 
-    return top_chunks
+        scored_chunks.sort(key=lambda x: x[0])
+        top_chunks = [chunk for _, chunk in scored_chunks[:top_k]]
 
+        memory_text = ""
+        for i, chunk in enumerate(top_chunks, 1):
+            memory_text += f"[Memory {i}]\n{chunk}\n\n"
 
+        return memory_text.strip()
 
-def clear_memory():
-    try:
-        chroma_client.delete_collection("chat_memory")
+    def clear_memory(self):
+        try:
+            self.chroma_client.delete_collection(self.collection_name)
+            self.collection = self.chroma_client.get_or_create_collection(name=self.collection_name)
+            return jsonify({"message": "Semua memori berhasil dihapus."}), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
 
-        global collection
-        collection = chroma_client.get_or_create_collection(name="chat_memory")
+    def add_to_short_memory(self, input_text: str, bot_reply: str):
+        try:
+            with open(self.short_memory_file, "r", encoding="utf-8") as f:
+                memory = json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            memory = []
 
-        return jsonify({"message": "Semua memori berhasil dihapus."}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        entry = {
+            "tsuki": input_text,
+            "sayaka": bot_reply,
+        }
 
-def add_to_short_memory(input, bot_reply):
-    
-        
-    try:
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            memory = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        memory = []
+        memory.append(entry)
 
-    entry = {
-        "tsuki": input,
-        "sayaka": bot_reply,
-        
-    }
+        with open(self.short_memory_file, "w", encoding="utf-8") as f:
+            json.dump(memory, f, ensure_ascii=False, indent=2)
 
-
-    memory.append(entry)
-
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(memory, f, ensure_ascii=False, indent=2)
-
-def get_recent_memory(limit=3):
-    try:
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            memory = json.load(f)
-            return memory[-limit:]
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
+    def get_recent_memory(self, limit=3) -> List[dict]:
+        try:
+            with open(self.short_memory_file, "r", encoding="utf-8") as f:
+                memory = json.load(f)
+                return memory[-limit:]
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
