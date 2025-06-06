@@ -5,21 +5,23 @@ from flask import jsonify
 from sentence_transformers import SentenceTransformer
 import chromadb
 import os
-
+from datetime import datetime
 
 class MemoryManager:
     def __init__(self,
                  chroma_path: str = "./memory_db",
                  collection_name: str = "chat_memory",
-                 short_memory_file: str = "./app/memory/short_memory/short_memory.json",
                  model_name: str = "all-MiniLM-L6-v2",
                  max_chunk_size: int = 500):
         self.chroma_client = chromadb.PersistentClient(path=chroma_path)
         self.collection_name = collection_name
         self.collection = self.chroma_client.get_or_create_collection(name=collection_name)
-        self.short_memory_file = short_memory_file
+        self.short_memory_file = "app/memory/short_memory"
         self.model = SentenceTransformer(model_name)
         self.max_chunk_size = max_chunk_size
+        self.base_dir = "app/memory/file"
+
+        
 
     def chunk_text(self, text: str) -> List[str]:
         chunks = []
@@ -95,9 +97,19 @@ class MemoryManager:
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
+
     def add_to_short_memory(self, input_text: str, bot_reply: str):
+        # Buat nama file berdasarkan tanggal
+        date_str = datetime.now().strftime("%Y-%m-%d")
+        filename = f"short_memory_{date_str}.json"
+        filepath = os.path.join(self.short_memory_file, filename)  
+
+        # Pastikan folder ada
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
+        # Coba baca file jika sudah ada, kalau tidak buat baru
         try:
-            with open(self.short_memory_file, "r", encoding="utf-8") as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 memory = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             memory = []
@@ -109,7 +121,7 @@ class MemoryManager:
 
         memory.append(entry)
 
-        with open(self.short_memory_file, "w", encoding="utf-8") as f:
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(memory, f, ensure_ascii=False, indent=2)
 
     def get_recent_memory(self, limit=3) -> List[dict]:
