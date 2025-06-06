@@ -97,9 +97,8 @@ This project is protected under the **Purnama License (Non-Commercial Use)**:
 
 For commercial inquiries or permission, contact:
 
-* 📧 Email: [purnamaridzkyn@gmail.com](mailto:purnamaridzkyn@gmail.com)
-* 📱 Instagram: [@ridzkyprn\_](https://instagram.com/ridzkyprn_)
-
+* 📧 Email: [purnamanugraha492@gmail.com](mailto:purnamanugraha492@gmail.com)
+* 📱 Instagram: [@purnama_ridzkyn\_](https://instagram.com/purnama_ridzkyn)
 ---
 
 ## Contact
