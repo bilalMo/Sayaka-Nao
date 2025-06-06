@@ -12,7 +12,7 @@ from datetime import datetime
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('views/home.html')
 @app.route('/chat')
 def chat():
     topic = request.args.get('topic')
