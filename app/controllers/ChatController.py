@@ -20,6 +20,7 @@ class ChatController:
         self.memory_triggers = memory_triggers
         self.initial_dialogues = self._load_initial_dialogues(dialogues_path)
         self.last_chat = MemoryManager().get_recent_memory()
+        self.classifier_model = ChatGoogleGenerativeAI(model="gemma-3n-e4b-it")
 
     def _load_initial_dialogues(self, path):
         try:
@@ -76,7 +77,12 @@ class ChatController:
     
     def chat_learn(self, user_input):
         
-        memory_context = MemoryManager().get_memory(user_input)
+        if self.needs_memory_lookup(user_input) == 1:
+            # Jika perlu melihat memori, ambil konteks dari memori
+            memory_context = MemoryManager().get_memory(user_input)
+        else:
+            # Jika tidak perlu, gunakan konteks kosong
+            memory_context = ""
         
         last_chat = "\n".join(
             [f"Tsuki: {dialogue['tsuki']}\nSayaka: {dialogue['sayaka']}" for dialogue in self.last_chat]
@@ -107,4 +113,19 @@ class ChatController:
         bot_reply = self.gemini.invoke(prompt)
         MemoryManager().add_to_short_memory(user_input, bot_reply.content)
         return jsonify({"reply":  bot_reply.content})
+    
+    def needs_memory_lookup(self,question):
+        prompt = f"""
+            Pertanyaan: {question}
+            Apakah pertanyaan ini **lebih baik dijawab** dengan melihat isi database atau memori chat sebelumnya? 
+            Berikan hanya satu angka sebagai jawaban:
+            - Jawab **1** jika informasi dari database/memori akan membantu menjawab pertanyaan ini.
+            - Jawab **0** jika cukup dijawab langsung tanpa melihat database atau memori.
+            Jawaban:
+            """
+
+            # Panggil model
+        answer = self.classifier_model.invoke(prompt)
+
+        return answer == "1"
     

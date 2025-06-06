@@ -56,7 +56,7 @@ class MemoryManager:
             ids=[new_id],
         )
         
-    def get_memory(self, query: str, top_k: int = 3) -> str:
+    def get_memory(self, query: str, top_k: int = 5) -> str:
         query_embedding = self.model.encode(query).tolist()
 
         results = self.collection.query(

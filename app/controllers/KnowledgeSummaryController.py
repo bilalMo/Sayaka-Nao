@@ -75,7 +75,7 @@ class KnowledgeSummaryController:
         final_summary = self.llm_model.invoke(prompt).strip()
         return final_summary
     
-    def process_revision(current_summary: str, user_feedback: str, topic: str, controller):
+    def process_revision(self,current_summary: str, user_feedback: str, topic: str,):
         """
         Memproses revisi ringkasan berdasarkan masukan user.
         
@@ -90,7 +90,7 @@ class KnowledgeSummaryController:
                 {'status': 'error', 'message': error_message}
         """
         try:
-            revised = controller.revise_summary(current_summary, user_feedback, topic)
+            revised = self.revise_summary(current_summary, user_feedback, topic)
             return {
                 "status": "success",
                 "revised_summary": revised
