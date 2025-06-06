@@ -3,12 +3,12 @@ from app import app
 from flask import render_template
 from flask import request
 
-from app.controllers.chat_controller import ChatController
+from app.controllers.ChatController import ChatController
+from app.controllers.KnowledgeSummaryController import KnowledgeSummaryController
 from app.models.memory_model import MemoryManager
 chat_controller = ChatController() 
 @app.route('/')
 def index():
-    print("CWD:", os.getcwd())  # DEBUGGING
     return render_template('views/template.html')
 
 @app.route('/api/chat', methods=['POST'])
@@ -16,7 +16,11 @@ def chat_route():
     data = request.get_json()
     input = data.get('message')
     return chat_controller.chat_learn(input)
-
+@app.route('/api/summary', methods=['POST'])
+def summary_route():
+    data = request.get_json()
+    input = data.get('message')
+    return KnowledgeSummaryController.summarize(input, )
 
 
 @app.route("/api/clear_memory", methods=["GET"])

@@ -4,6 +4,7 @@ from typing import List
 from flask import jsonify
 from sentence_transformers import SentenceTransformer
 import chromadb
+import os
 
 
 class MemoryManager:
@@ -29,16 +30,23 @@ class MemoryManager:
             start = end
         return chunks
 
-    def add_memory(self, path: str, response: str, important: bool = False):
-        if not important:
-            return  # ignore non-important for now
+    def add_memory(self, summary: str):
+        # Simpan summary ke file
+        timestamp = int(time.time())
+        filename = f"summary_{timestamp}.txt"
+        path = os.path.join(self.base_dir, filename)
+        
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(summary)
 
-        timestamp = time.time()
+        # Buat embedding dari summary
+        embedding = self.model.encode(summary).tolist()
+
+        # Dapatkan id unik (misal dari jumlah data di collection)
         current_ids = self.collection.get()["ids"]
         new_id = str(len(current_ids))
 
-        embedding = self.model.encode(response).tolist()
-
+        # Simpan ke collection dengan metadata path file
         self.collection.add(
             embeddings=[embedding],
             metadatas=[{
@@ -47,7 +55,7 @@ class MemoryManager:
             }],
             ids=[new_id],
         )
-
+        
     def get_memory(self, query: str, top_k: int = 3) -> str:
         query_embedding = self.model.encode(query).tolist()
 
