@@ -6,51 +6,48 @@
   <title>{% block title %}Sayaka Nao{% endblock %}</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-blue-50 font-sans min-h-screen flex flex-col">
+<body class="bg-blue-50 text-gray-800 font-sans min-h-screen flex">
 
-  <!-- NAVBAR -->
-  {% include 'components/chats/navbar.html' %}
-  
-  <!-- ACTION PANEL BUTTON -->
-  <button onclick="toggleActionPanel()" class="fixed top-4 right-4 z-50 bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700">
-    ⚙️ Panel
-  </button>
-  <!-- ACTION PANEL -->
-  {% include 'action_panel.html' %} 
-  <div class="flex flex-1 overflow-hidden relative">
-    <!-- SIDEBAR -->
-    {% include 'components/chats/sidebar.html' %}
+  <!-- SIDEBAR -->
+  {% include 'components/chats/sidebar.html' %}
 
-    <!-- MAIN CONTENT -->
-    <main class="flex-1 flex flex-col bg-gray-50">
+  <!-- MAIN CONTENT -->
+  <div class="flex flex-col flex-1 min-h-screen overflow-hidden">
+
+    <!-- TOP ACTION BAR -->
+    <div class="flex items-center justify-between bg-white/70 backdrop-blur-md px-4 py-2 shadow-sm sticky top-0 z-20">
+      <div class="flex items-center gap-3">
+        <button onclick="toggleSidebar()" class="md:hidden text-blue-800 hover:text-blue-600 text-2xl">
+          ☰
+        </button>
+        <h1 class="text-lg font-semibold text-blue-800">Sayaka Nao</h1>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="toggleActionPanel()" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm">
+          ⚙️ Panel
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="flex-1 overflow-y-auto">
       {% block content %}{% endblock %}
     </main>
+
   </div>
 
+  <!-- ACTION PANEL -->
+  {% include 'components/chats/action_panel.html' %}
+
   <script>
-    // Sidebar toggle
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    if(sidebarToggle) {
-      sidebarToggle.addEventListener("click", () => {
-        const sidebar = document.getElementById("sidebar");
-        sidebar.classList.toggle("-translate-x-full");
-      });
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("-translate-x-full");
     }
 
-    // Auto resize textarea
-    const userInput = document.getElementById("userInput");
-    if(userInput) {
-      userInput.addEventListener('input', () => {
-        userInput.style.height = 'auto';
-        userInput.style.height = userInput.scrollHeight + 'px';
-      });
-    }
-
-    // Toggle action panel
     function toggleActionPanel() {
-      const panel = document.getElementById("actionPanel");
-      panel.classList.toggle("translate-x-full");
+      document.getElementById("actionPanel").classList.toggle("translate-x-full");
     }
   </script>
 </body>
+
 </html>

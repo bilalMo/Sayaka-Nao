@@ -23,7 +23,7 @@ def chat():
     date_str = datetime.now().strftime("%Y-%m-%d")
     filename = f"short_memory_{date_str}_{topic}_{mode}.json"
 
-    return render_template('views/template.html', topic=topic, mode=mode, filename=filename)
+    return render_template('views/chat.html', topic=topic, mode=mode, filename=filename)
 
 @app.route('/api/chat_learn', methods=['POST'])
 def chat_route():

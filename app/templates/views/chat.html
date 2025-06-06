@@ -1,62 +1,107 @@
-{% extends 'layout.html' %}
+{% extends 'components/chats/layout.html' %}
 
 {% block content %}
- 
-  <!-- CHAT AREA -->
-  <div id="chatContainer" class="flex-1 p-4 space-y-4 overflow-y-auto">
-    <!-- Chat akan muncul di sini -->
+<div class="flex flex-col items-center h-[calc(100vh-3.5rem)]"> <!-- center -->
+
+  <!-- Chat Wrapper with max width -->
+  <div class="flex flex-col w-full max-w-3xl h-full">
+
+    <!-- Chat Area -->
+   <div id="chatContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200">
+  <!-- Messages injected here -->
+</div>
+
+
+<!-- Input Area -->
+<div class="bg-white border-t border-gray-200 p-4">
+  <div class="flex items-end gap-3">
+    <textarea 
+      id="userInput" 
+      rows="1" 
+      placeholder="Ketik pesan di sini..." 
+      class="flex-1 resize-none border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200"
+    ></textarea>
+    <button 
+      onclick="sendMessage()" 
+      class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200">
+      Kirim
+    </button>
+  </div>
+</div>
+
+    
   </div>
 
-  <!-- INPUT -->
-  <div class="bg-white border-t border-blue-200 p-4">
-    <div class="flex flex-col sm:flex-row gap-2">
-      <textarea id="userInput" rows="1" placeholder="Ketik pesan di sini..." class="flex-1 border border-blue-300 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-300"></textarea>
-      <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Kirim</button>
-    </div>
-  </div>
+</div>
+<style>
+  /* Custom scrollbar styling */
+#chatContainer::-webkit-scrollbar,
+#userInput::-webkit-scrollbar {
+  width: 8px;
+}
 
-  <script>
-    async function sendMessage() {
-      const userInput = document.getElementById("userInput");
-      const chatContainer = document.getElementById("chatContainer");
+#chatContainer::-webkit-scrollbar-thumb,
+#userInput::-webkit-scrollbar-thumb {
+  background-color: #3b82f6; /* blue-500 */
+  border-radius: 6px;
+}
 
-      const message = userInput.value.trim();
-      if (!message) return;
+#chatContainer::-webkit-scrollbar-track,
+#userInput::-webkit-scrollbar-track {
+  background-color: #e5e7eb; /* gray-200 */
+}
 
-      // Tampilkan pesan user
-      const userDiv = document.createElement("div");
-      userDiv.className = "flex justify-end";
-      userDiv.innerHTML = `
-        <div class="bg-blue-500 text-white p-3 rounded-2xl max-w-[75%] shadow">
-          <p>${message}</p>
+</style>
+<script>
+  const chatContainer = document.getElementById("chatContainer");
+  const userInput = document.getElementById("userInput");
+
+  userInput.addEventListener("input", () => {
+    userInput.style.height = "auto";
+    userInput.style.height = userInput.scrollHeight + "px";
+  });
+
+  function scrollToBottom() {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+
+  async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    const userBubble = document.createElement("div");
+    userBubble.className = "flex justify-end";
+    userBubble.innerHTML = `
+      <div class="bg-blue-600 text-white text-sm px-4 py-2 rounded-xl max-w-[70%] shadow">
+        ${message.replace(/\n/g, "<br>")}
+      </div>
+    `;
+    chatContainer.appendChild(userBubble);
+    userInput.value = "";
+    userInput.style.height = "auto";
+    scrollToBottom();
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message, mode: "Umum" })
+      });
+      const data = await response.json();
+
+      const botBubble = document.createElement("div");
+      botBubble.className = "flex items-start gap-3";
+      botBubble.innerHTML = `
+        <img src="../../static/img/sayaka nao 1.png" class="w-8 h-8 rounded-full mt-1" alt="Bot" />
+        <div class="bg-gray-200 text-sm px-4 py-2 rounded-xl max-w-[70%] shadow">
+          ${data.reply.replace(/\n/g, "<br>")}
         </div>
       `;
-      chatContainer.appendChild(userDiv);
-      userInput.value = "";
-      userInput.style.height = 'auto';
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: message, mode: "Umum" })
-        });
-        const data = await response.json();
-
-        const botDiv = document.createElement("div");
-        botDiv.className = "flex items-start space-x-2";
-        botDiv.innerHTML = `
-          <img src="../../static/img/sayaka nao 1.png" alt="Chara" class="w-10 h-10 rounded-full object-cover" />
-          <div class="bg-blue-200 text-black p-3 rounded-2xl max-w-[75%] shadow">
-            <p>${data.reply}</p>
-          </div>
-        `;
-        chatContainer.appendChild(botDiv);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-      } catch (error) {
-        console.error("Error:", error);
-      }
+      chatContainer.appendChild(botBubble);
+      scrollToBottom();
+    } catch (err) {
+      console.error("Error:", err);
     }
-  </script>
+  }
+</script>
 {% endblock %}
