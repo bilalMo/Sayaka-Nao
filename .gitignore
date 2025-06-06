@@ -1,0 +1,7 @@
+.env
+venv310
+memory_db
+app/memory
+app/persona.py
+__pycache__/
+*.pyc

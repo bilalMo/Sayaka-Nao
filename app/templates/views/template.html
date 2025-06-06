@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot Mode UI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 font-sans min-h-screen flex flex-col">
+
+  <div class="flex h-screen flex-col">
+    <!-- Area Utama -->
+    <div class="flex flex-1 overflow-hidden flex-col md:flex-row">
+      
+      <!-- Sidebar: Pilih Mode -->
+      <div class="w-full md:w-1/5 bg-blue-100 p-4 overflow-y-auto">
+        <h2 class="text-blue-900 font-bold mb-4">Pilih Mode</h2>
+         <p id="currentModeText" class="text-sm text-blue-800 mb-4 italic">Mode: Belum dipilih</p>
+        <ul id="modeList" class="space-y-2">
+          <li><button onclick="selectMode('Umum')" class="w-full text-left bg-white p-2 rounded-lg shadow hover:bg-blue-200">Umum</button></li>
+          <li><button onclick="selectMode('Filsafat')" class="w-full text-left bg-white p-2 rounded-lg shadow hover:bg-blue-200">Filsafat</button></li>
+          <li><button onclick="selectMode('Web Developer')" class="w-full text-left bg-white p-2 rounded-lg shadow hover:bg-blue-200">Web Developer</button></li>
+          <li><button onclick="selectMode('Ai')" class="w-full text-left bg-white p-2 rounded-lg shadow hover:bg-blue-200">Ai</button></li>
+
+        </ul>
+      </div>
+
+      <!-- Area Chat -->
+      <div class="w-full md:w-4/5 flex flex-col bg-gray-50">
+        <div id="chatContainer" class="flex-1 p-4 space-y-4 overflow-y-auto">
+          <!-- Pesan mode pembuka akan ditampilkan di sini -->
+        </div>
+
+        <!-- Input Pesan -->
+        <div class="bg-white border-t border-blue-200 p-4 flex flex-col sm:flex-row gap-2">
+          <input id="userInput" type="text" placeholder="Ketik pesan di sini..." class="flex-1 border border-blue-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300" />
+          <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Kirim</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    
+    const userInput = document.getElementById("userInput");
+    const chatContainer = document.getElementById("chatContainer");
+
+    let currentMode = null;
+    let chatHistory = [];
+
+    function selectMode(mode) {
+      currentMode = mode;
+      chatHistory = []; // Reset chat jika mode berubah
+      chatContainer.innerHTML = "";
+
+      // Tampilkan pesan pembuka mode
+      const introDiv = document.createElement("div");
+      introDiv.className = "flex items-start space-x-2";
+      introDiv.innerHTML = `
+        <img src="{{ url_for('static', filename='img/sayaka nao 1.png') }}" alt="Chara" class="w-10 h-10 rounded-full object-cover" />
+        <div class="bg-blue-200 text-black p-3 rounded-2xl max-w-[75%] shadow">
+          <p>Kamu sedang dalam mode: <strong>${mode}</strong>. Silakan mulai bertanya!</p>
+        </div>
+      `;
+      chatContainer.appendChild(introDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+      document.getElementById("currentModeText").textContent = `Mode: ${mode}`;
+
+    }
+
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      if (!message || !currentMode) {
+        alert("Silakan pilih mode terlebih dahulu.");
+        return;
+      }
+
+      // Tampilkan pesan user
+      const userDiv = document.createElement("div");
+      userDiv.className = "flex justify-end";
+      userDiv.innerHTML = `
+        <div class="bg-blue-500 text-white p-3 rounded-2xl max-w-[75%] shadow">
+          <p>${message}</p>
+        </div>
+      `;
+      chatContainer.appendChild(userDiv);
+
+      userInput.value = "";
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: message, mode: currentMode })
+        });
+
+        const data = await response.json();
+
+        // Tampilkan balasan dari server
+        const botDiv = document.createElement("div");
+        botDiv.className = "flex items-start space-x-2";
+        botDiv.innerHTML = `
+          <img src="../../static/img/sayaka nao 1.png" alt="Chara" class="w-10 h-10 rounded-full object-cover" />
+          <div class="bg-blue-200 text-black p-3 rounded-2xl max-w-[75%] shadow">
+            <p>${data.reply}</p>
+          </div>
+        `;
+        chatContainer.appendChild(botDiv);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+  </script>
+
+</body>
+</html>
