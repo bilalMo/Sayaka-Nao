@@ -2,7 +2,7 @@ import random
 from dotenv import load_dotenv
 import os
 import json
-from app.models.memory_model import add_memory, get_memory, add_to_short_memory,get_recent_memory
+from app.models.memory_model import MemoryManager
 from langchain_google_genai import ChatGoogleGenerativeAI
 from app.persona import persona_learn, persona_daily, memory_triggers
 import requests
@@ -10,16 +10,16 @@ from flask import jsonify
 
 
 class ChatController:
-    def __init__(self, api_key_env_name="google_api_key", dialogues_path="app/initial_dialogues.json"):
+    def __init__(self, api_key_env_name="google_api_key", dialogues_path="app/memory/initial_dialogues.json"):
         load_dotenv()
 
-        self.llm_model = ChatGoogleGenerativeAI(model="gemini-1.5-flash", max_tokens=None)
+        self.llm_model = ChatGoogleGenerativeAI(model="gemma-3-27b-it", max_tokens=None)
         self.gemini =self.llm_model
         self.persona_learn = persona_learn
         self.persona_daily = persona_daily
         self.memory_triggers = memory_triggers
         self.initial_dialogues = self._load_initial_dialogues(dialogues_path)
-        self.last_chat = get_recent_memory()
+        self.last_chat = MemoryManager().get_recent_memory()
 
     def _load_initial_dialogues(self, path):
         try:
@@ -29,14 +29,9 @@ class ChatController:
             print(f"[WARNING] File {path} tidak ditemukan. Memori awal kosong.")
             return []
 
-    def chat(self, user_input):
-        use_memory = any(word in user_input.lower() for word in self.memory_triggers)
-        past_conversations, past_responses = get_memory(user_input) if use_memory else ([], [])
-        
-        recent_memory = list(zip(past_conversations, past_responses))[-3:]
-        memory_context = "\n".join(
-            [f"Tsuki: {conv}\nSayaka: {resp}" for conv, resp in recent_memory]
-        )
+    def chat_daily(self, user_input):
+      
+        memory_context = ModuleNotFoundError.get_memory(user_input)
 
 
         initial_context = "\n".join(
@@ -48,7 +43,7 @@ class ChatController:
             [f"Tsuki: {dialogue['tsuki']}\nSayaka: {dialogue['sayaka']}" for dialogue in self.last_chat]
         )
 
-        prompt_daily = f"""{persona_daily}
+        prompt = f"""{persona_daily}
 
         Gunakan informasi relevan dari pembicaraan sebelumnya jika membantu:
         {memory_context}
@@ -72,7 +67,22 @@ class ChatController:
         Tsuki: {user_input}
         Sayaka:"""
 
-        prompt_learn = f"""{persona_learn}
+        
+     
+        bot_reply = self.gemini.invoke(prompt)
+        MemoryManager().add_to_short_memory(user_input, bot_reply.content)
+        return jsonify({"reply":  bot_reply.content})
+    
+    
+    def chat_learn(self, user_input):
+        
+        memory_context = MemoryManager().get_memory(user_input)
+        
+        last_chat = "\n".join(
+            [f"Tsuki: {dialogue['tsuki']}\nSayaka: {dialogue['sayaka']}" for dialogue in self.last_chat]
+        )
+
+        prompt = f"""{persona_learn}
         Gunakan informasi relevan dari pembicaraan sebelumnya jika membantu:
         {memory_context}
 
@@ -94,10 +104,7 @@ class ChatController:
 
         Tsuki: {user_input}
         Sayaka:"""
-     
-        bot_reply = self.gemini.invoke(prompt_daily)
-        add_to_short_memory(user_input, bot_reply.content)
-        # is_important = random.random() < 0.2
-        # add_memory(user_input, bot_reply, important=True)
+        bot_reply = self.gemini.invoke(prompt)
+        MemoryManager().add_to_short_memory(user_input, bot_reply.content)
         return jsonify({"reply":  bot_reply.content})
-
+    

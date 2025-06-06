@@ -4,7 +4,7 @@ from flask import render_template
 from flask import request
 
 from app.controllers.chat_controller import ChatController
-from app.models.memory_model import clear_memory
+from app.models.memory_model import MemoryManager
 chat_controller = ChatController() 
 @app.route('/')
 def index():
@@ -15,10 +15,10 @@ def index():
 def chat_route():
     data = request.get_json()
     input = data.get('message')
-    return chat_controller.chat(input)
+    return chat_controller.chat_learn(input)
 
 
 
 @app.route("/api/clear_memory", methods=["GET"])
 def clear_route():
-    return clear_memory()
+    return MemoryManager().clear_memory()
