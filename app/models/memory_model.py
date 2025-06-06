@@ -5,7 +5,7 @@ from flask import jsonify
 from sentence_transformers import SentenceTransformer
 import chromadb
 import os
-from datetime import datetime
+
 
 class MemoryManager:
     def __init__(self,
@@ -98,10 +98,8 @@ class MemoryManager:
             return jsonify({"error": str(e)}), 500
 
 
-    def add_to_short_memory(self, input_text: str, bot_reply: str):
-        # Buat nama file berdasarkan tanggal
-        date_str = datetime.now().strftime("%Y-%m-%d")
-        filename = f"short_memory_{date_str}.json"
+    def add_to_short_memory(self,filename:str, input_text: str, bot_reply: str):
+        # Buat nama file berdasarkan tanggal 
         filepath = os.path.join(self.short_memory_file, filename)  
 
         # Pastikan folder ada

@@ -30,7 +30,7 @@ class ChatController:
             print(f"[WARNING] File {path} tidak ditemukan. Memori awal kosong.")
             return []
 
-    def chat_daily(self, user_input):
+    def chat_daily(self, user_input,filename,topic):
       
         memory_context = ModuleNotFoundError.get_memory(user_input)
 
@@ -45,7 +45,7 @@ class ChatController:
         )
 
         prompt = f"""{persona_daily}
-
+        topic: {topic}
         Gunakan informasi relevan dari pembicaraan sebelumnya jika membantu:
         {memory_context}
 
@@ -71,11 +71,11 @@ class ChatController:
         
      
         bot_reply = self.gemini.invoke(prompt)
-        MemoryManager().add_to_short_memory(user_input, bot_reply.content)
+        MemoryManager().add_to_short_memory(filename,user_input, bot_reply.content)
         return jsonify({"reply":  bot_reply.content})
     
     
-    def chat_learn(self, user_input):
+    def chat_learn(self, user_input,filename,topic):
         
         if self.needs_memory_lookup(user_input) == 1:
             # Jika perlu melihat memori, ambil konteks dari memori
@@ -89,6 +89,7 @@ class ChatController:
         )
 
         prompt = f"""{persona_learn}
+        topik: {topic}
         Gunakan informasi relevan dari pembicaraan sebelumnya jika membantu:
         {memory_context}
 
@@ -111,7 +112,7 @@ class ChatController:
         Tsuki: {user_input}
         Sayaka:"""
         bot_reply = self.gemini.invoke(prompt)
-        MemoryManager().add_to_short_memory(user_input, bot_reply.content)
+        MemoryManager().add_to_short_memory(filename, user_input, bot_reply.content)
         return jsonify({"reply":  bot_reply.content})
     
     def needs_memory_lookup(self,question):
