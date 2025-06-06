@@ -19,7 +19,6 @@ class ChatController:
         self.persona_daily = persona_daily
         self.memory_triggers = memory_triggers
         self.initial_dialogues = self._load_initial_dialogues(dialogues_path)
-        self.last_chat = MemoryManager().get_recent_memory()
         self.classifier_model = ChatGoogleGenerativeAI(model="gemma-3n-e4b-it")
 
     def _load_initial_dialogues(self, path):
@@ -83,9 +82,9 @@ class ChatController:
         else:
             # Jika tidak perlu, gunakan konteks kosong
             memory_context = ""
-        
+        last_chat = MemoryManager().get_recent_memory(filename)
         last_chat = "\n".join(
-            [f"Tsuki: {dialogue['tsuki']}\nSayaka: {dialogue['sayaka']}" for dialogue in self.last_chat]
+            [f"Tsuki: {dialogue['tsuki']}\nSayaka: {dialogue['sayaka']}" for dialogue in last_chat]
         )
 
         prompt = f"""{persona_learn}

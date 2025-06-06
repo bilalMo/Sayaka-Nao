@@ -1,56 +1,50 @@
-{% extends 'components/chats/layout.html' %}
-
-{% block content %}
-<div class="flex flex-col items-center h-[calc(100vh-3.5rem)]"> <!-- center -->
+{% extends 'components/chats/layout.html' %} {% block content %}
+<div class="flex flex-col items-center h-[calc(100vh-3.5rem)]">
+  <!-- center -->
 
   <!-- Chat Wrapper with max width -->
   <div class="flex flex-col w-full max-w-3xl h-full">
-
     <!-- Chat Area -->
-   <div id="chatContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200">
-  <!-- Messages injected here -->
-</div>
+    <div
+      id="chatContainer"
+      class="flex-1 overflow-y-auto px-4 py-6 space-y-4 scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200">
+      <!-- Messages injected here -->
+    </div>
 
-
-<!-- Input Area -->
-<div class="bg-white border-t border-gray-200 p-4">
-  <div class="flex items-end gap-3">
-    <textarea 
-      id="userInput" 
-      rows="1" 
-      placeholder="Ketik pesan di sini..." 
-      class="flex-1 resize-none border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200"
-    ></textarea>
-    <button 
-      onclick="sendMessage()" 
-      class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200">
-      Kirim
-    </button>
+    <!-- Input Area -->
+    <div class="bg-white border-t border-gray-200 p-4">
+      <div class="flex items-end gap-3">
+        <textarea
+          id="userInput"
+          rows="1"
+          placeholder="Ketik pesan di sini..."
+          class="flex-1 resize-none border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200"></textarea>
+        <button
+          onclick="sendMessage()"
+          class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200">
+          Kirim
+        </button>
+      </div>
+    </div>
   </div>
-</div>
-
-    
-  </div>
-
 </div>
 <style>
   /* Custom scrollbar styling */
-#chatContainer::-webkit-scrollbar,
-#userInput::-webkit-scrollbar {
-  width: 8px;
-}
+  #chatContainer::-webkit-scrollbar,
+  #userInput::-webkit-scrollbar {
+    width: 8px;
+  }
 
-#chatContainer::-webkit-scrollbar-thumb,
-#userInput::-webkit-scrollbar-thumb {
-  background-color: #3b82f6; /* blue-500 */
-  border-radius: 6px;
-}
+  #chatContainer::-webkit-scrollbar-thumb,
+  #userInput::-webkit-scrollbar-thumb {
+    background-color: #3b82f6; /* blue-500 */
+    border-radius: 6px;
+  }
 
-#chatContainer::-webkit-scrollbar-track,
-#userInput::-webkit-scrollbar-track {
-  background-color: #e5e7eb; /* gray-200 */
-}
-
+  #chatContainer::-webkit-scrollbar-track,
+  #userInput::-webkit-scrollbar-track {
+    background-color: #e5e7eb; /* gray-200 */
+  }
 </style>
 <script>
   const chatContainer = document.getElementById("chatContainer");
@@ -64,44 +58,66 @@
   function scrollToBottom() {
     chatContainer.scrollTop = chatContainer.scrollHeight;
   }
-
-  async function sendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
-
-    const userBubble = document.createElement("div");
-    userBubble.className = "flex justify-end";
-    userBubble.innerHTML = `
-      <div class="bg-blue-600 text-white text-sm px-4 py-2 rounded-xl max-w-[70%] shadow">
-        ${message.replace(/\n/g, "<br>")}
-      </div>
-    `;
-    chatContainer.appendChild(userBubble);
-    userInput.value = "";
-    userInput.style.height = "auto";
-    scrollToBottom();
-
-    try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message, mode: "Umum" })
-      });
-      const data = await response.json();
-
-      const botBubble = document.createElement("div");
-      botBubble.className = "flex items-start gap-3";
-      botBubble.innerHTML = `
-        <img src="../../static/img/sayaka nao 1.png" class="w-8 h-8 rounded-full mt-1" alt="Bot" />
-        <div class="bg-gray-200 text-sm px-4 py-2 rounded-xl max-w-[70%] shadow">
-          ${data.reply.replace(/\n/g, "<br>")}
-        </div>
-      `;
-      chatContainer.appendChild(botBubble);
-      scrollToBottom();
-    } catch (err) {
-      console.error("Error:", err);
-    }
-  }
 </script>
+<script>
+
+    async function sendMessage() {
+      const filename = {{ filename | tojson }};
+      const topic = {{ topic | tojson }};
+      const message = userInput.value.trim();
+
+      if (!message) return;
+
+      // Buat bubble pesan user
+  const userBubble = document.createElement("div");
+  userBubble.className = "flex justify-end";
+  userBubble.innerHTML = `<div class="bg-blue-600 text-white text-sm px-4 py-2 rounded-xl max-w-[70%] shadow break-words whitespace-pre-wrap">${message.replace(/\n/g, "<br>")}</div>`;
+
+  chatContainer.appendChild(userBubble);
+
+      userInput.value = "";
+      userInput.style.height = "auto";
+      scrollToBottom();
+
+      try {
+        const response = await fetch("/api/chat_learn", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message: message,
+            mode: "Umum",
+            filename: filename  // kirim variabel filename disini
+          })
+        });
+        const data = await response.json();
+
+        const rawReply = data.reply;
+
+  // Bersihin spasi berlebih, tab, dan karakter tak terlihat lainnya
+  let cleanedReply = rawReply
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')    // hapus invisible chars
+    .replace(/\r\n|\r/g, '\n')                // samakan semua newline jadi \n
+    .replace(/\n+/g, '\n')                    // hapus newline berlebih jadi 1 saja
+    .replace(/[ \t]+/g, ' ')                  // ganti spasi/tab ganda jadi 1 spasi
+    .trim();                                 // hilangkan spasi di awal dan akhir
+
+  // Ganti newline jadi <br> untuk HTML
+  cleanedReply = cleanedReply.replace(/\n/g, '<br>');
+
+  const botBubble = document.createElement("div");
+  botBubble.className = "flex items-start gap-3";
+  botBubble.innerHTML = `
+    <img src="../../static/img/sayaka nao 1.png" class="w-8 h-8 rounded-full mt-1" alt="Bot" />
+    <div class="bg-gray-200 text-sm px-4 py-2 rounded-xl max-w-[70%] shadow break-words whitespace-pre-wrap">
+      ${cleanedReply}
+    </div>
+  `;
+  chatContainer.appendChild(botBubble);
+  scrollToBottom();
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    }
+</script>
+
 {% endblock %}

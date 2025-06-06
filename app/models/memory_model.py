@@ -122,9 +122,15 @@ class MemoryManager:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(memory, f, ensure_ascii=False, indent=2)
 
-    def get_recent_memory(self, limit=3) -> List[dict]:
+    def get_recent_memory(self, filename, limit=3) -> List[dict]:
+        # Buat nama file berdasarkan tanggal 
+        filepath = os.path.join(self.short_memory_file, filename)  
+
+        # Pastikan folder ada
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+
         try:
-            with open(self.short_memory_file, "r", encoding="utf-8") as f:
+            with open(filepath, "r", encoding="utf-8") as f:
                 memory = json.load(f)
                 return memory[-limit:]
         except (FileNotFoundError, json.JSONDecodeError):
