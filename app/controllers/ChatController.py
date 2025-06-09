@@ -1,11 +1,8 @@
-import random
 from dotenv import load_dotenv
-import os
 import json
 from app.models.memory_model import MemoryManager
 from langchain_google_genai import ChatGoogleGenerativeAI
 from app.persona import persona_learn, persona_daily, memory_triggers
-import requests
 from flask import jsonify
 
 
