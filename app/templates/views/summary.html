@@ -1,0 +1,173 @@
+{% extends 'components/chats/layout.html' %}
+{% block content %}
+<div id="cardsContainer" class="max-w-3xl mx-auto p-6 space-y-6">
+
+  <!-- CARD awal -->
+  <div class="card relative bg-white border border-gray-300 rounded-md p-6 shadow-sm">
+    <div class="summary-view whitespace-pre-wrap text-gray-900 text-base leading-relaxed mb-4">
+      {{ rangkuman | default("Belum ada rangkuman.") }}
+    </div>
+    <textarea class="summary-edit hidden w-full h-32 p-3 border border-gray-300 rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">{{ rangkuman | default("Belum ada rangkuman.") }}</textarea>
+
+    <div class="flex justify-end gap-3">
+      <button class="edit-btn bg-gray-600 text-white px-3 py-1 text-sm rounded hover:bg-gray-700">
+        Edit
+      </button>
+      <button class="add-memory-btn bg-yellow-600 text-white px-3 py-1 text-sm rounded hover:bg-yellow-700">
+        Tambah Ingatan
+      </button>
+    </div>
+  </div>
+
+  <!-- Card rangkuman baru akan muncul di sini -->
+
+</div>
+
+<!-- Input & Kirim (tetap ada di bawah container rangkuman) -->
+<div class="max-w-3xl mx-auto p-6">
+  <div class="bg-white bg-opacity-50 border border-gray-300 p-3 flex items-center gap-3 rounded-md backdrop-blur-sm">
+    <textarea
+      id="userInput"
+      rows="1"
+      placeholder="Ketik perintah di sini..."
+      class="flex-1 resize-none border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-400 scrollbar-track-gray-200"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button
+      id="sendBtn"
+      class="bg-blue-600 text-white px-5 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
+    >
+      Kirim
+    </button>
+  </div>
+</div>
+
+<!-- Modal Tambah Ingatan -->
+<div id="addMemoryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
+    <p class="mb-4 text-gray-800 font-medium">
+      Hanya bisa menyimpan 1 rangkuman. Yakin ingin simpan rangkuman ini?
+    </p>
+    <div class="flex justify-center gap-4">
+      <button id="confirmAddMemoryBtn" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">Ya</button>
+      <button id="cancelAddMemoryBtn" class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Batal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const cardsContainer = document.getElementById('cardsContainer');
+  const addMemoryModal = document.getElementById('addMemoryModal');
+  const confirmAddMemoryBtn = document.getElementById('confirmAddMemoryBtn');
+  const cancelAddMemoryBtn = document.getElementById('cancelAddMemoryBtn');
+  const userInput = document.getElementById('userInput');
+  const sendBtn = document.getElementById('sendBtn');
+
+  let cardToSave = null; // Card yang akan disimpan lewat modal
+
+  function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }
+
+  function bindCardEvents(card) {
+    const editBtn = card.querySelector('.edit-btn');
+    const addMemoryBtn = card.querySelector('.add-memory-btn');
+    const view = card.querySelector('.summary-view');
+    const edit = card.querySelector('.summary-edit');
+
+    editBtn.addEventListener('click', () => {
+      if (edit.classList.contains('hidden')) {
+        edit.value = view.textContent.trim();
+        view.classList.add('hidden');
+        edit.classList.remove('hidden');
+        editBtn.textContent = 'Simpan';
+      } else {
+        const newText = edit.value.trim() || "Belum ada rangkuman.";
+        view.textContent = newText;
+        view.classList.remove('hidden');
+        edit.classList.add('hidden');
+        editBtn.textContent = 'Edit';
+      }
+    });
+
+    addMemoryBtn.addEventListener('click', () => {
+      cardToSave = card;
+      addMemoryModal.classList.remove('hidden');
+    });
+  }
+
+  // Bind card awal
+  document.querySelectorAll('.card').forEach(bindCardEvents);
+
+  cancelAddMemoryBtn.addEventListener('click', () => {
+    addMemoryModal.classList.add('hidden');
+    cardToSave = null;
+  });
+
+  confirmAddMemoryBtn.addEventListener('click', () => {
+    if (!cardToSave) return;
+    // Ambil teks rangkuman dari card yang dipilih
+    const summaryText = cardToSave.querySelector('.summary-view').textContent.trim();
+
+    fetch('', {  // POST ke URL kosong dulu
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'simpan_rangkuman', rangkuman: summaryText }),
+    })
+    .then(res => {
+      if(res.ok) {
+        alert('Rangkuman berhasil disimpan');
+      } else {
+        alert('Gagal menyimpan rangkuman');
+      }
+      addMemoryModal.classList.add('hidden');
+      cardToSave = null;
+    })
+    .catch(() => {
+      alert('Gagal menyimpan rangkuman');
+      addMemoryModal.classList.add('hidden');
+      cardToSave = null;
+    });
+  });
+
+  sendBtn.addEventListener('click', () => {
+    const command = userInput.value.trim();
+    if (!command) return;
+
+    // Contoh fetch POST kirim perintah ke backend
+    fetch('', {  // POST ke URL kosong dulu
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ action: 'generate_rangkuman', command }),
+    })
+    .then(res => res.json())
+    .then(data => {
+      // data.rangkuman berisi rangkuman baru dari backend
+      if (data && data.rangkuman) {
+        // Buat card baru
+        const newCard = document.createElement('div');
+        newCard.className = 'card relative bg-white border border-gray-300 rounded-md p-6 shadow-sm';
+        newCard.innerHTML = `
+          <div class="summary-view whitespace-pre-wrap text-gray-900 text-base leading-relaxed mb-4">${data.rangkuman}</div>
+          <textarea class="summary-edit hidden w-full h-32 p-3 border border-gray-300 rounded-md resize-y focus:outline-none focus:ring-2 focus:ring-blue-400 mb-4">${data.rangkuman}</textarea>
+          <div class="flex justify-end gap-3">
+            <button class="edit-btn bg-gray-600 text-white px-3 py-1 text-sm rounded hover:bg-gray-700">Edit</button>
+            <button class="add-memory-btn bg-yellow-600 text-white px-3 py-1 text-sm rounded hover:bg-yellow-700">Tambah Ingatan</button>
+          </div>
+        `;
+        cardsContainer.appendChild(newCard);
+        bindCardEvents(newCard);
+        userInput.value = '';
+        autoResize(userInput);
+      } else {
+        alert('Rangkuman baru tidak ditemukan.');
+      }
+    })
+    .catch(() => {
+      alert('Gagal menghubungi server.');
+    });
+  });
+</script>
+
+{% endblock %}
