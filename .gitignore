@@ -1,7 +1,10 @@
 .env
 venv310
 memory_db
-app/memory
-app/persona.py
+app/memory/file/*
+!app/memory/file/.gitkeep
+app/memory/short_memory/*
+!app/memory/short_memory/.gitkeep
+app/memory/initial_dialogues.json
 __pycache__/
 *.pyc
