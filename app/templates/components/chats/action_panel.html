@@ -13,10 +13,17 @@
 
   <!-- Action Buttons -->
   <div class="flex-1 overflow-y-auto p-4 space-y-2">
-    <button
-      class="w-full px-4 py-2 bg-blue-100 hover:bg-blue-200 text-left rounded transition">
-      📝 Make Summary
-    </button>
+    <form action="/summary" method="POST">
+      <input type="hidden" name="filename" value="{{ filename }}" />
+      <input type="hidden" name="topic" value="{{ topic }}" />
+      <input type="hidden" name="mode" value="{{ mode }}" />
+      <button
+        type="submit"
+        class="w-full px-4 py-2 bg-blue-100 hover:bg-blue-200 text-left rounded transition">
+        📝 Make Summary
+      </button>
+    </form>
+
     <button
       class="w-full px-4 py-2 bg-blue-100 hover:bg-blue-200 text-left rounded transition">
       ➕ Add Knowledge
@@ -27,7 +34,7 @@
     </button>
     <button
       class="w-full px-4 py-2 bg-blue-100 hover:bg-blue-200 text-left rounded transition"
-       id="btnEditTopic">
+      id="btnEditTopic">
       🆕 New Topic
     </button>
   </div>

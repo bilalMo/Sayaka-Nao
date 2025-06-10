@@ -102,7 +102,6 @@
   const modal = new bootstrap.Modal(document.getElementById("modalTopic"));
   const topicInput = document.getElementById("topicInput");
   const form = document.getElementById("formTopic");
-console.log("Topic from Flask:", topicFromFlask);
   // Kalau topic kosong, langsung buka modal & non-editable
   window.addEventListener("DOMContentLoaded", () => {
     if (topicFromFlask.trim()=='None' || topicFromFlask.trim()=='') {
@@ -121,7 +120,7 @@ console.log("Topic from Flask:", topicFromFlask);
   form.addEventListener("submit", (e) => {
     e.preventDefault();
     const topic = topicInput.value.trim();
-
+    const mode = "{{ mode }}";  
     if (!topic) {
       topicInput.classList.add("is-invalid");
       return;
@@ -130,7 +129,8 @@ console.log("Topic from Flask:", topicFromFlask);
     topicInput.classList.remove("is-invalid");
 
     // Redirect ke URL baru dengan topic baru (ganti sesuai kebutuhan)
-    window.location.href = `/chat?topic=${encodeURIComponent(topic)}`;
+    window.location.href = `/chat?topic=${encodeURIComponent(topic)}&mode=${encodeURIComponent(mode)}`;
+
   });
 </script>
 

@@ -19,16 +19,14 @@ def chat():
     mode = request.args.get('mode')
     date_str = datetime.now().strftime("%Y-%m-%d")
     filename = f"short_memory_{date_str}_{topic}_{mode}.json"
-
     return render_template('views/chat.html', topic=topic, mode=mode, filename=filename)
-@app.route('/summary')
+@app.route('/summary', methods=['POST'])
 def summary():
-    topic = "percobaan"
-    mode = "percobaan"
-    
+    topic = request.form.get('topic')
+    mode = request.form.get('mode')
+    short_memory_filename = request.form.get('filename')
     date_str = datetime.now().strftime("%Y-%m-%d")
-    filename = f"short_memory_{date_str}_{topic}_{mode}.json"
-
+    filename = f"summary_{date_str}_{topic}_{mode}.json"
     return render_template('views/summary.html', topic=topic, mode=mode, filename=filename)
 @app.route('/api/chat_learn', methods=['POST'])
 def chat_route():
