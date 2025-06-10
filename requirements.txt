@@ -3,3 +3,4 @@ flask
 langchain-google-genai
 chromadb
 sentence-transformers
+protobuf<=3.20.3

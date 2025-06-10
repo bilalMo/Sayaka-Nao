@@ -51,7 +51,8 @@ Feel free to contribute or open issues for suggestions and improvements.
 3. Install dependencies:
 
    ```bash
-   pip install -r requirements.txt
+   pip install --upgrade -r requirements.txt
+   
    ```
 
 4. Run the application:
@@ -60,7 +61,7 @@ Feel free to contribute or open issues for suggestions and improvements.
    python run.py
    ```
 
-5. Open your browser and go to `http://localhost:5000`.
+6. Open your browser and go to `http://localhost:5000`.
 
 ---
 

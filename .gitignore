@@ -1,5 +1,5 @@
 .env
-venv310
+venv
 memory_db
 app/memory/file/*
 !app/memory/file/.gitkeep

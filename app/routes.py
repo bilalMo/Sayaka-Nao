@@ -17,9 +17,6 @@ def index():
 def chat():
     topic = request.args.get('topic')
     mode = request.args.get('mode')
-    if not topic or not mode:
-        return "Silakan masukkan topic dan mode di URL, contoh: /chat?topic=daily&mode=learn"
-
     date_str = datetime.now().strftime("%Y-%m-%d")
     filename = f"short_memory_{date_str}_{topic}_{mode}.json"
 
@@ -39,7 +36,6 @@ def chat_route():
     input = data.get('message')
     filename = data.get('filename')
     topic = data.get('topic')
-    
     controller = ChatController() 
     return controller.chat_learn(input, filename,topic)
 
