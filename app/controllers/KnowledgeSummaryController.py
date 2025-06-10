@@ -32,12 +32,13 @@ class KnowledgeSummaryController:
         Hasilnya berupa teks narasi yang jelas dan runtut, tanpa kutipan dialog.
         Dokumen ini akan menjadi referensi belajar, jadi jelaskan dengan bahasa yang mudah dimengerti dan terstruktur.
         """
-        return self.llm_model.invoke(prompt).strip()
+        return self.llm_model.invoke(prompt)
     
-    def summarize(self, full_text, topic):
+    def summarize(self, short_memory_filename, topic):
         """
         Proses utama: chunking -> summarize tiap chunk -> gabung ringkasan -> summarize gabungan
         """
+        full_text = MemoryManager().get_recent_memory( short_memory_filename)
         chunks = self.chunk_text(full_text)
         print(f"[INFO] Memecah teks menjadi {len(chunks)} chunk.")
         
@@ -47,7 +48,7 @@ class KnowledgeSummaryController:
             summary = self.summarize_chunk(chunk, topic)
             chunk_summaries.append(summary)
         
-        combined_summary_text = "\n\n".join(chunk_summaries)
+        combined_summary_text = "\n\n".join([chunk.content for chunk in chunk_summaries])
         
         # Ringkas semua ringkasan chunk jadi satu ringkasan final
         final_prompt = f"""
@@ -58,8 +59,9 @@ class KnowledgeSummaryController:
         Buatlah rangkuman akhir yang menggabungkan semua poin penting dan insight, dengan bahasa yang mudah dipahami dan runtut.
         """
         print("[INFO] Membuat ringkasan akhir dari semua ringkasan chunk...")
-        final_summary = self.llm_model.invoke(final_prompt).strip()
-        return final_summary
+        final_summary = self.llm_model.invoke(final_prompt)
+       
+        return final_summary.content
     
     def revise_summary(self, current_summary, user_feedback, topic):
         prompt = f"""

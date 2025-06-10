@@ -6,7 +6,8 @@ from flask import request
 from app.controllers.ChatController import ChatController
 from app.controllers.KnowledgeSummaryController import KnowledgeSummaryController
 from app.models.memory_model import MemoryManager
-
+from app.utils.markdown_helper import render_markdown
+ 
 from datetime import datetime
 
 
@@ -26,8 +27,11 @@ def summary():
     mode = request.form.get('mode')
     short_memory_filename = request.form.get('filename')
     date_str = datetime.now().strftime("%Y-%m-%d")
+    print(f"[INFO] Ringkasan untuk topik: {topic}, mode: {mode}, file: {short_memory_filename}")
+    markdown=KnowledgeSummaryController().summarize(short_memory_filename, topic)
     filename = f"summary_{date_str}_{topic}_{mode}.json"
-    return render_template('views/summary.html', topic=topic, mode=mode, filename=filename)
+    summary = render_markdown(markdown)
+    return render_template('views/summary.html', topic=topic, mode=mode, filename=filename ,summary=summary, markdown=markdown)
 @app.route('/api/chat_learn', methods=['POST'])
 def chat_route():
     data = request.get_json()
